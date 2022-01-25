@@ -1,0 +1,12 @@
+[programs.devnet]
+swear_jar = "83LUtAjXJarg5wVPS7mqJny4p3ZPZtZmKAbh4sYECdAi"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "devnet"
+wallet = "/home/braeden/.config/solana/devnet.json"
+
+[scripts]
+test = "mocha -t 1000000 tests/"
