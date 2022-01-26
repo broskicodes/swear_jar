@@ -6,4 +6,6 @@ pub enum ErrorCode {
   BadPDA,
   #[msg("Bump does not match")]
   BadBump,
+  #[msg("Invalid percentage")]
+  InvalidPercentage,
 }

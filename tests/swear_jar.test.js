@@ -14,55 +14,67 @@ describe('swear_jar', () => {
 
   let enc = new TextEncoder();  
   let jar = null;
-  let bump = null;
-  let jarNum = 7;
+  let jarBump = null;
+
+  const user = web3.Keypair.generate();
   
   it("inits", async () => {
-    [jar, bump] = await web3.PublicKey.findProgramAddress(
+    let aTx = await provider.connection.requestAirdrop(user.publicKey, 0.5 * web3.LAMPORTS_PER_SOL);
+    await provider.connection.confirmTransaction(aTx);
+    
+    [jar, jarBump] = await web3.PublicKey.findProgramAddress(
       [
         enc.encode('jar'),
-        provider.wallet.publicKey.toBytes(),
-        enc.encode(jarNum.toString()),
+        user.publicKey.toBytes(),
         // program.programId.toBytes(),
       ],
       program.programId,
     );
   });
- 
 
-  it('Is initialized!', async () => {
-    const recipient = web3.Keypair.generate();
-
-    const tx = await program.rpc.initJar(bump, jarNum.toString(),
-      {
-        accounts: {
-          user: provider.wallet.publicKey,
-          jar: jar,
-          systemProgram: web3.SystemProgram.programId,
-        },
-        // signers: [recipient]
-      }
-    );
-
-    let acc = await program.account.swearJar.fetch(jar);
-    assert.equal(acc.owner.toString(), provider.wallet.publicKey.toString());
-  });
-
-  it('transfers sol!', async () => {
+  it('swears!', async () => {
     let bal1 = await provider.connection.getBalance(jar);
+    let balu = await provider.connection.getBalance(user.publicKey);
 
-    const tx = await program.rpc.swear(new BN(1000),
+
+    const tx = await program.rpc.swear(jarBump, new BN(10000),
       {
         accounts: {
-          user: provider.wallet.publicKey,
+          user: user.publicKey,
           jar: jar,
           systemProgram: web3.SystemProgram.programId,
         },
-        // signers: [recipient]
+        signers: [user]
       }
     );
+    // console.log(tx);
 
     let bal2 = await provider.connection.getBalance(jar);
-    assert.equal(bal2 - bal1, 1000);
+    let baluu = await provider.connection.getBalance(user.publicKey);
+
+    console.log(balu - baluu);
+    assert.equal(bal2 - bal1, 10000);
+  });
+
+  it('repents!', async () => {
+    // let user = web3.Keypair.generate();
+    let bal1 = await provider.connection.getBalance(jar);
+
+
+    const tx = await program.rpc.repent(jarBump, new BN(20),
+      {
+        accounts: {
+          user: user.publicKey,
+          jar: jar,
+          systemProgram: web3.SystemProgram.programId,
+        },
+        signers: [user]
+      }
+    );
+    console.log(tx);
+
+    let bal2 = await provider.connection.getBalance(jar);
+
+    assert.equal(bal1 - Math.floor(bal1 * 20 / 100), bal2);
   });
 });
