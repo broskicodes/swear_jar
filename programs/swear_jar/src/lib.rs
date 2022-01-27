@@ -9,7 +9,12 @@ declare_id!("83LUtAjXJarg5wVPS7mqJny4p3ZPZtZmKAbh4sYECdAi");
 #[program]
 pub mod swear_jar {
   use super::*;
-  pub fn swear(ctx: Context<TransferCtx>, bump: u8, lamports: u64) -> ProgramResult {
+  pub fn initialize(ctx: Context<InitCtx>, min_bal: u64) -> ProgramResult {
+    ctx.accounts.base_account.rent_exempt_bal = min_bal;
+
+    Ok(())
+  }
+  pub fn swear(ctx: Context<TransferCtx>, lamports: u64) -> ProgramResult {
     let account_list = vec![
       ctx.accounts.user.to_account_info(),
       ctx.accounts.jar.to_account_info(),
@@ -34,9 +39,9 @@ pub mod swear_jar {
       return Err(ErrorCode::InvalidPercentage.into());
     }
     let amount = ctx.accounts.jar.to_account_info().lamports();
-    // let bal = amount - jar.min_bal;
+    let bal = amount - ctx.accounts.base_account.rent_exempt_bal;
 
-    let lamports = (amount * percentage as u64) / 100;
+    let lamports = (bal * percentage as u64) / 100;
     let seeds = [b"jar", ctx.accounts.user.key.as_ref(), &[bump]];
     
     solana_program::program::invoke_signed(
@@ -57,14 +62,38 @@ pub mod swear_jar {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8)]
+// #[instruction(bump: u8)]
+pub struct InitCtx<'info> {
+  #[account(mut)]
+  pub payer: Signer<'info>,
+  #[account(
+    init, payer = payer, space = 64,
+    seeds = [b"base account".as_ref(), program_id.as_ref()], bump,
+  )]
+  pub base_account: Account<'info, BaseAccount>,
+  #[account(address = solana_program::system_program::ID)]
+  pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+// #[instruction(jar_bump: u8, account_bump: u8)]
 pub struct TransferCtx<'info> {
   #[account(mut)]
   pub user: Signer<'info>,
   #[account(
     mut,
-    seeds = [b"jar".as_ref(), user.key.as_ref()], bump = bump
+    seeds = [b"jar".as_ref(), user.key.as_ref()], bump,
   )]
   pub jar: UncheckedAccount<'info>,
+  #[account(
+    seeds = [b"base account".as_ref(), program_id.as_ref()], bump,
+  )]
+  pub base_account: Account<'info, BaseAccount>,
+  #[account(address = solana_program::system_program::ID)]
   pub system_program: Program<'info, System>,
+}
+
+#[account]
+pub struct BaseAccount {
+  rent_exempt_bal: u64,
 }
