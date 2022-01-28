@@ -1,6 +1,10 @@
 import arg from 'arg';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { sendSwearTx, sendRepentTx } from './functions';
+import { 
+  sendSwearTx, 
+  sendRepentTx,
+  sendCJTx, 
+} from './functions';
 
 const parseArgumentsIntoOptions = (rawArgs) => {
   const args = arg(
@@ -28,7 +32,7 @@ const parseArgumentsIntoOptions = (rawArgs) => {
   };
 }
 
-const parseOptions = (opts) => {
+const parseOptions = async (opts) => {
   if(opts.help || opts.subCommand === undefined) {
     console.log("--Useful help message--");
     return;
@@ -36,26 +40,23 @@ const parseOptions = (opts) => {
 
   if(opts.subCommand === "swear"){
     if(opts.param === undefined || opts.args.length > 2){
-      console.error("Usage: sol-swear-jar swear <amount of sol to send> [OPTIONS]...");
-      console.error("Try 'sol-swear-jar --help' for more information.");
-
+      badUsageMsg("Usage: sol-swear-jar swear <amount of sol to send> [OPTIONS]...");
       return;
     }
     
-    let amnt = parseInt(opts.param);
+    let amnt = parseFloat(opts.param);
     
     if(Number.isNaN(amnt) || amnt < 0){
-      console.error("Sol amount must be a positive integer.");
+      console.error("Sol amount must be a positive number.");
       return;
     }
 
     amnt = opts.isLamports ? amnt : amnt * LAMPORTS_PER_SOL;
-    sendSwearTx(amnt);
+
+    await sendSwearTx(amnt);
   } else if(opts.subCommand === "repent"){
     if(opts.param === undefined || opts.args.length > 2){
-      console.error("Usage: sol-swear-jar repent <percentage of jar to reclaim> [OPTIONS]...");
-      console.error("Try 'sol-swear-jar --help' for more information.");
-
+      badUsageMsg("Usage: sol-swear-jar repent <percentage of jar to reclaim> [OPTIONS]...");
       return;
     }
 
@@ -66,18 +67,33 @@ const parseOptions = (opts) => {
       return;
     }
 
-    sendRepentTx(pct);
+    await sendRepentTx(pct);
+  } else if(opts.subCommand === "create-jar"){
+    if(opts.args.length > 1){
+      badUsageMsg("Usage: sol-swear-jar create-jar [OPTIONS]...");
+      return;
+    }
+
+    try {
+      await sendCJTx();
+    } catch(err){
+      console.error(err);
+    }
   } else {
-    console.error("Invalid sub-command.");
-    console.error("Try 'sol-swear-jar --help' for more information.");
+    badUsageMsg("Invalid sub-command.");
     return;
   }
 
 }
 
-export const cli = (args) => {
+export const cli = async (args) => {
   let options = parseArgumentsIntoOptions(args);
-  parseOptions(options);
+  await parseOptions(options);
   
   // console.log(options.args.length);
+}
+
+const badUsageMsg = (msg) => {
+  console.error(msg);
+  console.error("Try 'sol-swear-jar --help' for more information.");
 }

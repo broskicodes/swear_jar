@@ -1,0 +1,163 @@
+{
+  "version": "0.0.0",
+  "name": "swear_jar",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "baseAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "minBal",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "createJar",
+      "accounts": [
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "jar",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "baseAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "swear",
+      "accounts": [
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "jar",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "baseAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "lamports",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "repent",
+      "accounts": [
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "jar",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "baseAccount",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "percentage",
+          "type": "u8"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BaseAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "rentExemptBal",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 300,
+      "name": "BadPDA",
+      "msg": "Jar account does not match required PDA"
+    },
+    {
+      "code": 301,
+      "name": "BadBump",
+      "msg": "Bump does not match"
+    },
+    {
+      "code": 302,
+      "name": "InvalidPercentage",
+      "msg": "Invalid percentage"
+    },
+    {
+      "code": 303,
+      "name": "JarPreviouslyInit",
+      "msg": "Jar already initialized"
+    }
+  ],
+  "metadata": {
+    "address": "BngF29y6CR71RyWDHeuXac9sFSKu1mDC6ZHD9KkJyXnZ"
+  }
+}
