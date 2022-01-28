@@ -44,7 +44,7 @@ describe('swear_jar', () => {
 
   // it('inits base account!', async () => {
   //   let amnt = await provider.connection.getMinimumBalanceForRentExemption(0);
-  //   const tx = await program.rpc.initialize(acntBump, new BN(amnt),
+  //   const tx = await program.rpc.initialize(new BN(amnt),
   //     {
   //       accounts: {
   //         payer: provider.wallet.publicKey,
@@ -55,7 +55,7 @@ describe('swear_jar', () => {
   //     }
   //   );
 
-  //   let acnt = program.account.baseAccount.fetch(baseAccount);
+  //   let acnt = await program.account.baseAccount.fetch(baseAccount);
 
   //   assert.equal(acnt.rentExemptBal, amnt);
   // });

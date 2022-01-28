@@ -8,4 +8,6 @@ pub enum ErrorCode {
   BadBump,
   #[msg("Invalid percentage")]
   InvalidPercentage,
+  #[msg("Jar already initialized")]
+  JarPreviouslyInit,
 }

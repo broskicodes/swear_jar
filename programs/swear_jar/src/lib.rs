@@ -4,7 +4,7 @@ use solana_program;
 pub mod error;
 use error::*;
 
-declare_id!("83LUtAjXJarg5wVPS7mqJny4p3ZPZtZmKAbh4sYECdAi");
+declare_id!("BngF29y6CR71RyWDHeuXac9sFSKu1mDC6ZHD9KkJyXnZ");
 
 #[program]
 pub mod swear_jar {
@@ -14,6 +14,34 @@ pub mod swear_jar {
 
     Ok(())
   }
+
+  pub fn create_jar(ctx: Context<TransferCtx>) -> ProgramResult {
+    let bal = ctx.accounts.jar.to_account_info().lamports();
+    let rent_exempt_bal = ctx.accounts.base_account.rent_exempt_bal;
+
+    if bal > rent_exempt_bal {
+      return Err(ErrorCode::JarPreviouslyInit.into());
+    }
+
+    let account_list = vec![
+      ctx.accounts.user.to_account_info(),
+      ctx.accounts.jar.to_account_info(),
+    ];
+
+    let transfer_instruction = solana_program::system_instruction::transfer(
+      ctx.accounts.user.key,
+      ctx.accounts.jar.key,
+      ctx.accounts.base_account.rent_exempt_bal - bal,
+    );
+
+    solana_program::program::invoke(
+      &transfer_instruction,
+      account_list.as_slice(),
+    )?;
+
+    Ok(())
+  }
+
   pub fn swear(ctx: Context<TransferCtx>, lamports: u64) -> ProgramResult {
     let account_list = vec![
       ctx.accounts.user.to_account_info(),
