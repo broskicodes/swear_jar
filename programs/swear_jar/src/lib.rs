@@ -20,7 +20,7 @@ pub mod swear_jar {
     let rent_exempt_bal = ctx.accounts.base_account.rent_exempt_bal;
 
     if bal > rent_exempt_bal {
-      return Err(ErrorCode::JarPreviouslyInit.into());
+      return Err(ErrorCode::JarPreviouslyInitialized.into());
     }
 
     let account_list = vec![
@@ -43,6 +43,13 @@ pub mod swear_jar {
   }
 
   pub fn swear(ctx: Context<TransferCtx>, lamports: u64) -> ProgramResult {
+    let bal = ctx.accounts.jar.to_account_info().lamports();
+    let rent_exempt_bal = ctx.accounts.base_account.rent_exempt_bal;
+
+    if bal < rent_exempt_bal {
+      return Err(ErrorCode::JarNotInitialized.into());
+    }
+
     let account_list = vec![
       ctx.accounts.user.to_account_info(),
       ctx.accounts.jar.to_account_info(),
